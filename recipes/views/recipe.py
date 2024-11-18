@@ -1,4 +1,6 @@
 from django_filters.rest_framework import DjangoFilterBackend
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema, OpenApiParameter, extend_schema_view
 from rest_framework import filters, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -9,6 +11,61 @@ from recipes.filters import RecipeFilter
 from recipes.models import Recipe
 from recipes.serializers import RecipeCreateUpdateSerializer, RecipeSerializer
 
+@extend_schema_view(
+    list=extend_schema(
+        summary="List Recipes",
+        description="Retrieve a list of all recipes with optional filters, search, and ordering. Open to any user.",
+        parameters=[
+            OpenApiParameter("title", OpenApiTypes.STR, description="Filter by recipe title"),
+            OpenApiParameter("description", OpenApiTypes.STR, description="Filter by recipe description"),
+            OpenApiParameter("created_at", OpenApiTypes.DATE, description="Order by creation date"),
+            OpenApiParameter("cooking_time", OpenApiTypes.INT, description="Order by cooking time"),
+            OpenApiParameter("views_count", OpenApiTypes.INT, description="Order by views count"),
+        ],
+        responses={200: RecipeSerializer(many=True)},
+    ),
+    retrieve=extend_schema(
+        summary="Retrieve a Recipe",
+        description="Retrieve details of a specific recipe by its ID. Open to any user. Updates the view count.",
+        responses={200: RecipeSerializer},
+    ),
+    create=extend_schema(
+        summary="Create a Recipe",
+        description="Create a new recipe. Requires authentication.",
+        request=RecipeCreateUpdateSerializer,
+        responses={201: RecipeSerializer},
+    ),
+    update=extend_schema(
+        summary="Update a Recipe",
+        description="Update an existing recipe. Requires authentication.",
+        request=RecipeCreateUpdateSerializer,
+        responses={200: RecipeSerializer},
+    ),
+    partial_update=extend_schema(
+        summary="Partially Update a Recipe",
+        description="Partially update an existing recipe. Requires authentication.",
+        request=RecipeCreateUpdateSerializer,
+        responses={200: RecipeSerializer},
+    ),
+    destroy=extend_schema(
+        summary="Delete a Recipe",
+        description="Delete a recipe by its ID. Requires authentication.",
+        responses={204: None},
+    ),
+    favorite=extend_schema(
+        summary="Add or Remove Recipe from Favorites",
+        description=(
+            "Toggle a recipe as a favorite for the authenticated user. "
+            "If the recipe is already in favorites, it will be removed; otherwise, it will be added."
+        ),
+        responses={200: OpenApiTypes.OBJECT},
+    ),
+    favorites=extend_schema(
+        summary="List Favorite Recipes",
+        description="Retrieve a list of all recipes marked as favorites by the authenticated user.",
+        responses={200: RecipeSerializer(many=True)},
+    ),
+)
 
 class RecipeViewSet(ModelViewSet):
     queryset = Recipe.objects.all()

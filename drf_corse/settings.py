@@ -41,10 +41,11 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'django_filters',
-    # Local
     'users',
     'recipes',
     'reviews',
+    #
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
@@ -136,4 +137,12 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Recipe Management API',
+    'DESCRIPTION': 'An API for managing recipes, reviews, and comments, allowing users to create, update, and interact with recipe content.',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
 }
